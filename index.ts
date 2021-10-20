@@ -1,4 +1,4 @@
-import { generate, of, interval, fromEvent } from 'rxjs';
+import { generate, interval, fromEvent } from 'rxjs';
 import {
   scan,
   map,
@@ -7,11 +7,9 @@ import {
   takeWhile,
   last,
   mergeMap,
-  filter,
-  throttleTime,
-  buffer,
   delay,
-  debounceTime,
+  pluck,
+  bufferCount,
 } from 'rxjs/operators';
 
 // https://sandraisrael.github.io/Memory-Game-fend/#
@@ -61,49 +59,52 @@ const generateCards = (index) => {
     )
   );
 };
-let arr1 = [],
-  arr2 = [];
 // Generate 1st row of cards
-generateCards(1).subscribe((res) => (arr1 = res));
+generateCards(1).subscribe();
 // Generate 2nd row of cards
-generateCards(6).subscribe((res) => (arr2 = res));
+generateCards(6).subscribe();
 
-const mouseClick$ = fromEvent(document, 'click');
+const mouseClick$ = fromEvent(document.querySelectorAll('.child'), 'click');
 mouseClick$
   .pipe(
-    filter((event: MouseEvent) => {
-      return event.target.classList?.contains('child');
+    pluck('srcElement'),
+    tap((event: HTMLElement) => {
+      event.classList.add('rotate', 'open');
     }),
-    tap((event: MouseEvent) => {
-      event.target.classList.add('rotate', 'open');
-    }),
-    // delay is added to finish the rotate which takes 1 seconds in css
-    delay(500),
-    tap((event) => (event.target.children[0].style.visibility = 'visible')),
+    // // delay is added to finish the rotate which takes 1 seconds in css
+    // delay(500),
+    tap(
+      (event: HTMLElement) => (event.children[0].style.visibility = 'visible')
+    )
+  )
+  .subscribe();
+
+const transitionEnd$ = fromEvent(
+  document.querySelectorAll('.child'),
+  'animationend'
+);
+transitionEnd$
+  .pipe(
+    pluck('srcElement'),
+    bufferCount(2),
     delay(2000),
     // check if open classes are present for two divs and they are same they can be opened
     // and remove click class from them
-    tap(() => {
-      // create copy as we are changing same reference in dom
-      const openElements = Object.assign(
-        [],
-        document.getElementsByClassName('open')
-      );
-      const openItemsLen = openElements.length;
-      console.log(openItemsLen);
-      if (openItemsLen === 2) {
-        const match =
-          openElements[0].children[0].innerHTML ===
-          openElements[1].children[0].innerHTML;
-        for (const elem of openElements) {
-          if (match) {
-            elem.classList.add('done');
-          } else {
-            elem.children[0].style.visibility = 'hidden';
-          }
-          elem.classList.remove('rotate', 'open');
+    tap((openElements: HTMLDivElement[]) => {
+      const match =
+        openElements[0].children[0].innerHTML ===
+        openElements[1].children[0].innerHTML;
+
+      for (const elem of openElements) {
+        if (match) {
+          elem.classList.add('done');
+        } else {
+          elem.children[0].style.visibility = 'hidden';
         }
+        elem.classList.remove('rotate', 'open');
       }
     })
   )
   .subscribe();
+
+// TODO, Check user chances. every two presses counts as 1. Use buffer operator to count and reset it.
