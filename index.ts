@@ -19,6 +19,15 @@ const level = {
   MODERATE: 7,
   HARD: 10,
 };
+
+const getRandomColor = () => {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+};
 // Generates a random number
 const randomNoGenerator = () =>
   Math.floor(Math.random() * Math.floor(level.EASY));
@@ -64,44 +73,39 @@ generateCards(1).subscribe();
 // Generate 2nd row of cards
 generateCards(6).subscribe();
 
-const mouseClick$ = fromEvent(document.querySelectorAll('.child'), 'click');
+const mouseClick$ = fromEvent(document.querySelectorAll('.card'), 'click');
 mouseClick$
   .pipe(
     pluck('srcElement'),
     tap((event: HTMLElement) => {
-      event.classList.add('rotate', 'open');
-    }),
-    // // delay is added to finish the rotate which takes 1 seconds in css
-    // delay(500),
-    tap(
-      (event: HTMLElement) => (event.children[0].style.visibility = 'visible')
-    )
+      console.log(event.parentElement);
+      event.parentElement.classList.add('rotate', 'open');
+    })
   )
   .subscribe();
 
 const transitionEnd$ = fromEvent(
-  document.querySelectorAll('.child'),
-  'animationend'
+  document.querySelectorAll('.card'),
+  'transitionend'
 );
 transitionEnd$
   .pipe(
     pluck('srcElement'),
     bufferCount(2),
-    delay(2000),
     // check if open classes are present for two divs and they are same they can be opened
     // and remove click class from them
     tap((openElements: HTMLDivElement[]) => {
+      console.log(openElements);
       const match =
-        openElements[0].children[0].innerHTML ===
-        openElements[1].children[0].innerHTML;
+        openElements[0].children[1].innerHTML ===
+        openElements[1].children[1].innerHTML;
 
       for (const elem of openElements) {
         if (match) {
           elem.classList.add('done');
         } else {
-          elem.children[0].style.visibility = 'hidden';
+          elem.classList.remove('rotate', 'open');
         }
-        elem.classList.remove('rotate', 'open');
       }
     })
   )
