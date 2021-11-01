@@ -1,8 +1,11 @@
 <div id="app"></div>
 <style>
   .container {
+    margin: 50px;
     display: flex;
-    justify-content: space-around;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
   }
 
   .done {
@@ -11,10 +14,10 @@
   }
 
   .scene {
-    width: 100px;
-    height: 130px;
+    width: 8rem;
+    height: 8rem;
     /* border: 1px solid #ccc; */
-    margin: 40px 0;
+    margin: 10px;
     perspective: 600px;
   }
   .card {
@@ -51,70 +54,75 @@
 </style>
 
 <div id="info">Memory Cards Game</div>
+<p>Select Level</p>
 
-<div id="grid" class="">
-  <div class="container">
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="1" class="card__face child-back"></div>
-      </div>
-    </div>
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="2" class="card__face child-back"></div>
-      </div>
-    </div>
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="3" class="card__face child-back"></div>
-      </div>
-    </div>
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="4" class="card__face child-back"></div>
-      </div>
-    </div>
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="5" class="card__face child-back"></div>
-      </div>
+<input type="radio" id="easy" name="level" value="EASY" />
+<label for="easy">EASY</label><br />
+
+<input type="radio" id="medium" name="level" value="MEDIUM" />
+<label for="medium">MEDIUM</label><br />
+
+<input type="radio" id="hard" name="level" value="HARD" />
+<label for="hard">HARD</label><br />
+<div class="container">
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="1" class="card__face child-back"></div>
     </div>
   </div>
-  <div class="container">
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="6" class="card__face child-back"></div>
-      </div>
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="2" class="card__face child-back"></div>
     </div>
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="7" class="card__face child-back"></div>
-      </div>
+  </div>
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="3" class="card__face child-back"></div>
     </div>
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="8" class="card__face child-back"></div>
-      </div>
+  </div>
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="4" class="card__face child-back"></div>
     </div>
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="9" class="card__face child-back"></div>
-      </div>
+  </div>
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="5" class="card__face child-back"></div>
     </div>
-    <div class="scene">
-      <div class="card">
-        <div class="card__face child-front"></div>
-        <div id="10" class="card__face child-back"></div>
-      </div>
+  </div>
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="6" class="card__face child-back"></div>
+    </div>
+  </div>
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="7" class="card__face child-back"></div>
+    </div>
+  </div>
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="8" class="card__face child-back"></div>
+    </div>
+  </div>
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="9" class="card__face child-back"></div>
+    </div>
+  </div>
+  <div class="scene">
+    <div class="card">
+      <div class="card__face child-front"></div>
+      <div id="10" class="card__face child-back"></div>
     </div>
   </div>
 </div>

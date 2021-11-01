@@ -15,19 +15,19 @@ import {
 // https://sandraisrael.github.io/Memory-Game-fend/#
 
 const level = {
-  EASY: 5,
-  MODERATE: 7,
-  HARD: 10,
+  EASY: 8,
+  MODERATE: 12,
+  HARD: 16,
 };
 
-const getRandomColor = () => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
+// const getRandomColor = () => {
+//   const letters = '0123456789ABCDEF';
+//   let color = '#';
+//   for (var i = 0; i < 6; i++) {
+//     color += letters[Math.floor(Math.random() * 16)];
+//   }
+//   return color;
+// };
 // Generates a random number
 const randomNoGenerator = () =>
   Math.floor(Math.random() * Math.floor(level.EASY));
@@ -68,6 +68,18 @@ const generateCards = (index) => {
     )
   );
 };
+const levelClick = fromEvent(
+  document.querySelectorAll("input[name='level']"),
+  'change'
+);
+levelClick
+  .pipe(
+    pluck('srcElement'),
+    tap((data) => {
+      const level = data.attributes.value;
+    })
+  )
+  .subscribe();
 // Generate 1st row of cards
 generateCards(1).subscribe();
 // Generate 2nd row of cards
