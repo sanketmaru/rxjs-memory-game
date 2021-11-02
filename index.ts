@@ -10,39 +10,57 @@ import {
   delay,
   pluck,
   bufferCount,
+  switchMap,
+  debounceTime,
 } from 'rxjs/operators';
 
 // https://sandraisrael.github.io/Memory-Game-fend/#
 
 const level = {
   EASY: 8,
-  MODERATE: 12,
+  MEDIUM: 12,
   HARD: 16,
 };
 
-// const getRandomColor = () => {
-//   const letters = '0123456789ABCDEF';
-//   let color = '#';
-//   for (var i = 0; i < 6; i++) {
-//     color += letters[Math.floor(Math.random() * 16)];
-//   }
-//   return color;
-// };
 // Generates a random number
-const randomNoGenerator = () =>
-  Math.floor(Math.random() * Math.floor(level.EASY));
+const randomNoGenerator = (maxNo) =>
+  Math.floor(Math.random() * Math.floor(maxNo));
+
 // Generate a random array of numbers for a range
-const randomArr$ = interval(100).pipe(
-  map(() => randomNoGenerator()),
-  distinct(),
-  scan((acc, curr) => {
-    return [...acc, curr];
-  }, []),
-  takeWhile((res) => {
-    return res.length === 5 ? false : true;
-  }, true),
-  last()
-);
+const randomArr$ = (maxNo) =>
+  interval(100).pipe(
+    map(() => randomNoGenerator(maxNo)),
+    distinct(),
+    scan((acc, curr) => {
+      return [...acc, curr];
+    }, []),
+    takeWhile((res) => {
+      return res.length === maxNo ? false : true;
+    }, true),
+    last()
+  );
+
+const createCard = (id: number) => {
+  const cardSceneContainer = document.createElement('div');
+  cardSceneContainer.classList.add('scene');
+
+  const cardContainer = document.createElement('div');
+  cardContainer.classList.add('card');
+
+  const cardFront = document.createElement('div');
+  cardFront.classList.add('card__face', 'child-front');
+
+  const cardBack = document.createElement('div');
+  cardBack.classList.add('card__face', 'child-back');
+  cardBack.id = id.toString();
+
+  cardContainer.appendChild(cardFront);
+  cardContainer.appendChild(cardBack);
+
+  cardSceneContainer.appendChild(cardContainer);
+  return cardSceneContainer;
+};
+
 //Show the array in cards
 const fillCards = (arr, index) =>
   generate(
@@ -52,60 +70,68 @@ const fillCards = (arr, index) =>
   ).pipe(
     tap((key) => {
       const htmlKey = key + index;
+      const container = document.getElementById('container');
+      const card = createCard(htmlKey);
+      container.appendChild(card);
       document.getElementById(`${htmlKey}`).innerHTML = `${arr[key]}`;
     }),
     // only emit when last emission is done
     last()
   );
 
-const generateCards = (index) => {
-  return randomArr$.pipe(
-    mergeMap(
-      (val) => fillCards(val, index),
-      (source) => {
-        return source;
-      }
-    )
-  );
+const generateCards = (index, maxNo) => {
+  return randomArr$(maxNo).pipe(mergeMap((val) => fillCards(val, index)));
 };
+
 const levelClick = fromEvent(
   document.querySelectorAll("input[name='level']"),
-  'change'
+  'click'
 );
 levelClick
   .pipe(
+    debounceTime(300),
     pluck('srcElement'),
-    tap((data) => {
-      const level = data.attributes.value;
-    })
+    map((data: HTMLInputElement) => {
+      // Not convinced by having string property here.
+      const selectedLevel = data.attributes['value'].value;
+      const noOfBlocks = level[selectedLevel];
+      return noOfBlocks / 2;
+    }),
+    // when a new level is selected, clear the html
+    tap(() => (document.getElementById('container').innerHTML = '')),
+    switchMap((noOfBlocks) =>
+      generateCards(0, noOfBlocks).pipe(map(() => noOfBlocks))
+    ),
+    switchMap(
+      (noOfBlocks) => {
+        return generateCards(noOfBlocks, noOfBlocks);
+      },
+      (source) => source
+    )
   )
-  .subscribe();
-// Generate 1st row of cards
-generateCards(1).subscribe();
-// Generate 2nd row of cards
-generateCards(6).subscribe();
+  .subscribe(() => {
+    initMouseClick().subscribe();
+    initTransitionEnd().subscribe();
+  });
 
-const mouseClick$ = fromEvent(document.querySelectorAll('.card'), 'click');
-mouseClick$
-  .pipe(
+const initMouseClick = () => {
+  const mouseClick$ = fromEvent(document.querySelectorAll('.card'), 'click');
+  return mouseClick$.pipe(
     pluck('srcElement'),
     tap((event: HTMLElement) => {
-      console.log(event.parentElement);
       event.parentElement.classList.add('rotate', 'open');
     })
-  )
-  .subscribe();
+  );
+};
 
-const transitionEnd$ = fromEvent(
-  document.querySelectorAll('.card'),
-  'transitionend'
-);
-transitionEnd$
-  .pipe(
+const initTransitionEnd = () => {
+  const transitionEnd$ = fromEvent(
+    document.querySelectorAll('.card'),
+    'transitionend'
+  );
+  return transitionEnd$.pipe(
     pluck('srcElement'),
     bufferCount(2),
-    // check if open classes are present for two divs and they are same they can be opened
-    // and remove click class from them
     tap((openElements: HTMLDivElement[]) => {
       console.log(openElements);
       const match =
@@ -120,7 +146,7 @@ transitionEnd$
         }
       }
     })
-  )
-  .subscribe();
+  );
+};
 
 // TODO, Check user chances. every two presses counts as 1. Use buffer operator to count and reset it.
